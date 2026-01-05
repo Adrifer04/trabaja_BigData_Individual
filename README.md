@@ -15,11 +15,11 @@ La versión final del trabajo puede visualizarse
 en: <https://Adrifer04.github.io/trabajo_BigData_individual/>. 
 
 
-<!-- Hola, soy AdrianFernández y s presento mi trabajo individual de la asignatura BigData sobre como España ganó el mundial del 2010 -->
+<!--  -->
 
-El autor del trabajo soy yo,  Manuel Andorra Grande (macogaaaaxxx@alumni.uv.es), .....
+El autor del trabajo soy yo, Adrian Fernandez (aferbru@alumni.uv.es), .....
 
-El título del trabajo es .....  En el trabajo se hace  .... blah-blah ...
+El título del trabajo es La primera de España. En el trabajo se hace  un pequeño repaso de los datos mas importantes sobre como consiguió la selección española levantar su primer mundial de futbol
 
 
 "# trabaja_BigData_Individual" 
