@@ -1,0 +1,157 @@
+
+project:
+  title: "trabajo_BigData_individual"
+  type: website          
+  output-dir: docs       
+  preview:
+    port: 4445
+    browser: true
+    watch-inputs: true
+    navigate: true
+  
+
+include-in-header:
+  - text: |
+     <link rel = "shortcut icon" href = "imagenes/uv.jpeg" />
+     
+
+lightbox: true
+
+
+
+
+anchor-sections: true
+
+
+other-links:
+  - text: Web del curso
+    href: https://perezp44.github.io/intro-ds-25-26-web/
+  - text: Trabajos de mis compañeros
+    href: https://perezp44.github.io/intro-ds-25-26-web/05-trabajos-estudiantes.html 
+  - text: Repo del trabajo
+    href: https://github.com/Adrifer04/trabajo_BigData_individual     
+    
+
+
+toc: true
+toc-depth: 3
+toc-location: right    
+toc-title: "Índice"   
+
+
+link-external-newwindow: true 
+
+
+crossref:
+  fig-title: Gráfico  
+  tbl-title: Tabla    
+ 
+
+
+fig-cap-location: bottom
+
+
+fig-format: png
+fig-dpi: 300
+
+
+
+code-copy: true
+code-overflow: wrap   
+code-fold: show
+code-line-numbers: true
+
+
+code-tools: true
+code-link: true
+
+
+knitr:
+  opts_chunk: 
+    collapse: true
+    comment: "#>" 
+    fig.asp:  7/9
+    out.width: "95%"
+    fig.align: "center"
+    fig.show: "hold"
+    R.options:
+      options(scipen = 999)  
+
+
+editor_options: 
+  chunk_output_type: console
+
+
+license: CC BY
+
+
+
+execute:
+  echo: true
+  eval: true
+  message: false
+  warning: false
+  
+
+
+
+
+
+
+
+website:
+  title: "La Primera de España"
+  favicon: imagenes/my_favicon_uv.jpeg      
+  search:   
+    location: navbar
+    type: overlay   
+    copy-button: true
+  navbar:
+    pinned: true
+    logo: "imagenes/BANNER.jpeg"   
+    background: "#AA0000"    
+    foreground: "#FFFFFF"
+    left:
+      - icon: house-door
+        href: index.html
+    right:
+      - text: "Trabajo individual"       
+        href: my_trabajo_BigData.qmd   
+      - icon: github
+        href: https://github.com/Adrifer04    
+      - icon: envelope
+        url: "mailto:aferbru@alumni.uv.es"           
+  page-footer:
+    border: true
+    background: "#F1BF00"
+    foreground: "#000000"
+    left: "© 2026 Adrian Fernandez"  
+    center: "Hecho con [Quarto](https://quarto.org)"
+    right:
+      - icon: github
+        href: https://github.com/Adrifer04     #- pon tu usuario Github AQUI!!!!
+      - icon: envelope
+        url: "mailto:aferbru@alumni.uv.es"            #- pon tu e-mail AQUI!!!!
+    
+    
+
+#- FORMATO -------   
+#- de este CUARTO bloque HAS de CAMBIAR algunas cosas --------------------------
+#- de este CUARTO bloque HAS de CAMBIAR algunas cosas --------------------------
+
+format:
+  html:
+    code-fold: true
+    page-layout: full
+    theme: 
+      - flatly 
+    css: 
+      - assets/styles.css
+    mainfont: Lato
+    highlight-style: a11y  
+
+   
+
+#- opciones de lenguaje
+lang: es  #- castellano {es, en}    https://quarto.org/docs/authoring/language.html
+language: assets/_my_language-es.yml  #- por si quieres usar tus propios "términos" en castellano

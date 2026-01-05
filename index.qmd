@@ -1,0 +1,29 @@
+---
+title: La primera de España
+image: imagenes/escudo.jpg
+about:
+  template: trestles
+  image-width: 16em
+  image-shape: round
+  links:
+    - icon: envelope
+      text: e-mail
+      href: "mailto:aferbru@alumni.uv.es"
+    - icon: github
+      text: Github
+      href: https://github.com/Adrifer04
+toc: false
+code-tools: false
+---
+  
+Hola, soy Adrian Fernandez
+
+Esta web sirve para presentar el trabajo final individual para la asignatura "Programación y manejo de datos en la era Del Big Data", optativa de GECO en la Facultad de Economía de la Universitat de València.
+
+La web de la asignatura está [aquí](https://perezp44.github.io/intro-ds-25-26-web/){target="_blank"} y los trabajos de mis compañeros de curso puedes verlos [aquí](https://perezp44.github.io/intro-ds-25-26-web/05-trabajos-estudiantes.html){target="_blank"}.
+
+
+Mi trabajo lleva por título : "La primera de España". El objetivo es que conozcais como fue el gran triunfo que logró la selección española en el 2010, consiguiendo conquistar su primer mundial de futbol.
+
+
+El trabajo puede verse [aquí](my_trabajo_BigData.html).

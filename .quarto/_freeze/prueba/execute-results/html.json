@@ -1,0 +1,17 @@
+{
+  "hash": "d1e014dbe107f8e857345d3d7a03b87c",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Prueba de Vida\"\nformat: html\n---\n\n## Hola Mundo\n\nSi puedes leer esto y ver el gráfico de abajo, tu R funciona perfectamente.\n\n\n::: {.cell layout-align=\"center\"}\n\n```{.r .cell-code}\nlibrary(ggplot2)\nggplot(mtcars, aes(x = wt, y = mpg)) +\n  geom_point(color = \"blue\", size = 3) +\n  theme_minimal()\n```\n\n::: {.cell-output-display}\n![](prueba_files/figure-html/unnamed-chunk-1-1.png){fig-align='center' width=95%}\n:::\n:::\n\n",
+    "supporting": [
+      "prueba_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

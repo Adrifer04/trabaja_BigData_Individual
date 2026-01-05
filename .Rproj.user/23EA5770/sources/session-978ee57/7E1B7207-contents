@@ -1,0 +1,399 @@
+---
+title: "La primera de España"
+description: |
+  Viendo como la selección española logró este trofeo
+author:
+  - name: Adrian Fernández
+    affiliation: Universitat de València
+    affiliation-url: https://www.uv.es
+date: 2026-01-07                           
+categories: [trabajo BigData, Futbol, España]   
+image: "./imagenes/escudo.png"
+title-block-banner: true 
+title-block-banner-color: "#FFFFFF"     
+toc-depth: 3
+smooth-scroll: true
+format: 
+  html:
+    backgroundcolor: "#DCDCDC"
+    link-external-newwindow: true
+    
+code-tools: true
+code-link: true
+---
+
+
+## Intro 
+
+Para realizar el trabajo, hemos sacado los datos de la pagina webb Kaggle, una web la cual contiene millones de datos, y entre ellos, de la Champions League. Os dejamos por aqui el [enlace](https://www.kaggle.com/){target="_blank"}
+
+---
+
+## 1. Lugar
+
+El mundial se jugó en Sudáfrica. Fue la primera vez que se hacía en África y se utilizaron 10 estadios diferentes. He creado este mapa interactivo para situar las ciudades y los estadios donde se jugaron los partidos.
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(maps)
+library(plotly)
+
+
+ruta_a_datos_1 <- "./datos/FIFA_World_Cup_1558_23.csv"
+df_completo <- read_csv(ruta_a_datos_1)
+
+año_2010 <- df_completo %>%
+  rename(Año = Year, Ciudad = City, Estadio = Stadium) %>% 
+  select(Año, Estadio, Ciudad) %>% 
+  filter(Año == 2010) %>%
+  group_by(Ciudad, Estadio) %>% 
+  mutate(Ciudad = case_when( 
+    Ciudad =="Mangaung/Bloemfontein" ~ "Bloemfontein",
+    Ciudad == "Nelson Mandela Bay/Port Elizabeth" ~ "Port Elizabeth",
+    Ciudad == "Polokwane" ~ "Pietersburg", 
+    Ciudad == "Tshwane/Pretoria" ~ "Pretoria", 
+    Ciudad == "Phokeng" ~ "Rustenburg",
+    TRUE ~ Ciudad)) %>% 
+  slice(1) %>%
+  ungroup()
+
+
+data(world.cities)
+coords_sudafrica <- world.cities %>%
+  filter(country.etc == "South Africa") %>%
+  select(name, lat, long)
+
+mapa_finales <- año_2010 %>% 
+  left_join(coords_sudafrica, by = c("Ciudad" = "name")) 
+
+
+map_plot <- plot_geo(data = mapa_finales,
+                     lat = ~lat,   
+                     lon = ~long) %>% 
+  
+  add_markers(
+    text = ~paste("<b>Ciudad:</b>", Ciudad, "<br>",
+                  "<b>Estadio:</b>", Estadio),
+    color = I("#D32F2F"), 
+    size = I(12),   
+    marker = list(
+      line = list(color = "white", width = 0.5),
+    hoverinfo = "text")) %>%
+  
+  layout(
+    title = "Sedes Mundial Sudáfrica 2010",
+    geo = list(
+      scope = 'africa',   
+      showframe = FALSE,
+      showland = TRUE,
+      landcolor = "#F0F0F0",
+      showocean = TRUE,
+      oceancolor = "#B3E5FC",
+      countrycolor = "white",
+      lonaxis = list(range = c(16, 33)), 
+      lataxis = list(range = c(-35, -22))
+    )
+  ) %>%
+  config(displayModeBar = FALSE)
+
+
+map_plot
+```
+---
+
+## 2. Resultados
+
+Aquí analizo la trayectoria de la selección. Jugamos 7 partidos en total. Aunque empezamos perdiendo contra Suiza (el punto rojo del gráfico), luego encadenamos 6 victorias seguidas hasta la final. En el gráfico se ve el rival, la fase y el resultado de cada encuentro.
+
+
+```{r}
+library(tidyverse)
+
+ruta_a_datos_1 <- "./datos/resultados.csv"
+df_completo <- read_csv(ruta_a_datos_1) 
+
+Partidos_España <- df_completo %>% 
+  mutate(date = as.Date(date)) %>% 
+  filter(tournament == "FIFA World Cup",
+         between(date, as.Date("2010-06-11"), as.Date("2010-07-11"))) %>% 
+  filter(home_team == "Spain" | away_team == "Spain") %>%
+  
+  mutate(Resultado_ESP = case_when(
+    (home_team == "Spain" & home_score < away_score) ~ "Perdido",
+    (away_team == "Spain" & away_score < home_score) ~ "Perdido",
+    (home_team == "Spain" & home_score > away_score) ~ "Ganado",
+    (away_team == "Spain" & away_score > home_score) ~ "Ganado" ))%>% 
+  
+  unite(col = "Resultado", 
+        home_score, away_score, 
+        sep = " - ", 
+        remove = FALSE) %>% 
+ 
+  rename(Local = home_team, Visitante = away_team,
+         Torneo = tournament) %>% 
+  select(Local, Visitante, Resultado, Resultado_ESP)
+
+
+Partidos_España <- Partidos_España %>%
+  mutate(Orden = 1:n(),
+         Fase = c("Grupos 1", "Grupos 2", "Grupos 3", 
+                  "Octavos", "Cuartos", "Semis", "Final"),
+         Rival = ifelse(Local == "Spain", Visitante, Local))
+
+
+  ggplot(Partidos_España, aes(x = Orden, y = Resultado_ESP, group = 1)) +
+  geom_path(color = "gray80", size = 1) +
+  geom_point(aes(color = Resultado_ESP), size = 12) + 
+  geom_text(aes(label = Resultado), color = "white", fontface = "bold", size = 3) +
+  geom_text(aes(label = paste("vs", Rival)), vjust = -2.5, size = 3.5, fontface =      "italic") +
+  geom_text(aes(label = Fase), vjust = 3.5, size = 3, color = "gray30") +
+  scale_color_manual(values = c("Ganado" = "#228B22", "Perdido" = "#CC0000")) +
+  scale_y_discrete(limits = c("Perdido", "Ganado")) +
+  theme_minimal() +
+  labs(title = "Cronología: El camino a la estrella",
+       subtitle = "Resultados oficiales de cada encuentro",
+       x = NULL, y = NULL) +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    legend.position = "none",
+    plot.title = element_text(face = "bold", size = 14))
+```
+---
+
+## 3. Goles
+
+Vamos a ver las estadísticas de goles. Lo curioso de este mundial es que España ganó metiendo pocos goles, pero encajando muy pocos también.
+
+### 3.1 Goles metidos
+
+En ataque, la cosa estuvo muy repartida entre pocos jugadores. He sacado el top 3 de goleadores de la selección: Villa metió la mayoría, pero los goles decisivos de Puyol (semis) e Iniesta (final) aparecen también destacados.
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(maps)
+library(plotly)
+library(ggimage)
+library(cropcircles) #install.packages("cropcircles")
+library(magick)    
+
+ruta_a_datos_1 <- "./datos/goalscorers.csv"
+df_completo <- read_csv(ruta_a_datos_1)
+
+mundial <- df_completo %>% 
+rename(Fecha = date, Equipo_Local = home_team, Equipo_Visitante = away_team
+       , Goleador = scorer) %>% 
+  select(Fecha, Equipo_Local, Equipo_Visitante, Goleador) %>% 
+  mutate(Fecha = as.Date(Fecha)) %>% 
+  filter(between(Fecha, as.Date("2010-06-11") , as.Date("2010-07-11"))) %>% 
+  filter(Equipo_Local == "Spain"| Equipo_Visitante == "Spain") %>% 
+  count(Goleador) %>% 
+  arrange(desc(n)) %>% 
+  head(3)
+
+imagenes_goleadores <- data.frame(
+  Goleador = c("David Villa", "Andrés Iniesta", "Carles Puyol"),
+  Foto = c("villa.jpg", "iniesta.png", "puyol.jpg")) %>% 
+
+  mutate(logo = file.path("imagenes", Foto))
+
+top_3 <- left_join(mundial,imagenes_goleadores, by = "Goleador") 
+
+top_3 <- top_3 %>%
+  mutate(logo_circular = circle_crop(logo))
+
+mi_grafico <- ggplot(top_3, aes(x = reorder(Goleador, n), y = n)) +
+  geom_col(fill = "#DD0000", width = 0.6) +
+  coord_flip() +
+  geom_image(aes(image = logo_circular, y = 0), size = 0.3) +
+  
+  geom_text(aes(label = n), hjust = -0.2, fontface = "bold", size = 3.5) +
+  
+  scale_y_continuous(expand = expansion(mult = c(0.2, 0.1))) + 
+  
+  labs(
+    title = "Goleadores de la selección",
+    subtitle = "Mundial Sudáfrica 2010",
+    x = NULL, 
+    y = "Goles"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_blank(),
+    axis.text.x = element_blank(),
+    axis.ticks = element_blank(),
+    panel.grid.major.y = element_blank(),
+    panel.grid = element_blank(),
+    plot.margin = margin(10, 20, 10, 20))
+
+mi_grafico
+```
+
+### 3.2 Goles encajados
+
+Aquí es donde se ganó el mundial. He comparado el promedio de goles encajados por partido de las selecciones que llegaron lejos. Como se ve en el gráfico, la defensa de España fue la mejor, encajando poquísimos goles en comparación con los partidos jugados
+
+
+```{r}
+library(tidyverse)
+library(ggimage)
+library(countrycode)
+
+
+ruta_a_datos_1 <- "./datos/FIFA - 2010.csv"
+df_completo <- read_csv(ruta_a_datos_1)
+
+
+top_10_grafico <- df_completo %>% 
+  rename(equipo = Team, 
+         partidos_jugados = `Games Played`, 
+         goles_contra = `Goals Against`) %>% 
+  mutate(equipo = case_when( equipo == "England" ~ "United Kingdom",
+                            TRUE ~ equipo)) %>%
+  mutate(Goles_partido = goles_contra / partidos_jugados) %>% 
+  select(equipo, partidos_jugados, Goles_partido) %>% 
+  filter(partidos_jugados >= 4) %>% 
+  arrange(Goles_partido) %>% 
+  mutate(iso2 = countrycode(equipo, origin = "country.name",
+                            destination = "iso2c")) %>% 
+  mutate(iso2 = tolower(iso2)) %>% 
+  mutate(flag_URL = paste0("https://hatscripts.github.io/circle-flags/flags/", iso2, ".svg"))
+
+
+mi_grafico <- ggplot(top_10_grafico, aes(x = partidos_jugados, y = Goles_partido)) +
+  theme_minimal() +
+  
+  geom_image(aes(image = flag_URL), size = 0.08, position = position_jitter
+             (width = 0.2, height = 0.02, seed = 123)) + 
+  
+  
+  labs(
+    title = "Las mejores defensas",
+    x = "Partidos Jugados",
+    y = "Goles encajados") +
+  scale_x_continuous(breaks = 4:7,                
+                     limits = c(3.5, 7.5),         
+                     expand = c(0, 0)) +
+  scale_y_continuous(expand = expansion(mult = c(0.1, 0.1))) +
+  
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    panel.grid = element_blank(),
+    panel.grid.minor = element_blank(),
+    plot.margin = margin(10, 20, 10, 20))
+
+
+mi_grafico
+```
+---
+
+## 4. El gran momento
+
+Para el momento más importante del trabajo he querido hacer algo distinto.He cogido una secuencia de fotos del gol de Iniesta y las he unido todas para crear un GIF. Un gol que sin duda marcó la historia de España.
+
+```{r}
+library(magick)
+
+img1  <- image_read("./imagenes/1.png") %>% image_scale("700")
+img2  <- image_read("./imagenes/2.png") %>% image_scale("700")
+img3  <- image_read("./imagenes/3.png") %>% image_scale("700")
+img4  <- image_read("./imagenes/4.png") %>% image_scale("700")
+img5  <- image_read("./imagenes/5.png") %>% image_scale("700")
+img6  <- image_read("./imagenes/6.png") %>% image_scale("700")
+img7  <- image_read("./imagenes/7.png") %>% image_scale("700")
+img8  <- image_read("./imagenes/8.png") %>% image_scale("700")
+img9  <- image_read("./imagenes/9.png") %>% image_scale("700")
+img10 <- image_read("./imagenes/10.png") %>% image_scale("700")
+img11 <- image_read("./imagenes/11.png") %>% image_scale("700")
+img12 <- image_read("./imagenes/12.png") %>% image_scale("700")
+img13 <- image_read("./imagenes/13.png") %>% image_scale("700")
+img14 <- image_read("./imagenes/14.png") %>% image_scale("700")
+img15 <- image_read("./imagenes/15.png") %>% image_scale("700")
+
+equipos_unidos <- image_join(img1, img2, img3, img4, img5, img6, img7, img8, 
+                             img9, img10, img11, img12, img13, img14, img15)
+
+image_animate(image_scale(equipos_unidos), fps = 1)
+```
+
+---
+
+## 5. Palmarés
+
+Finalmente, así quedó la tabla histórica de campeones del mundo después de nuestra victoria en 2010. He utilizado una tabla un poco más visual con las banderas y los trofeos que tenía cada país hasta ese año.
+
+```{r}
+library(tidyverse)
+library(gt)
+library(gtExtras)   
+library(countrycode) 
+
+
+ruta_a_datos_1 <- "./datos/WorldCups.csv"
+df_completo <- read_csv(ruta_a_datos_1)
+tabla_preparada <- df_completo %>%
+  filter(Year <= 2010) %>% 
+  rename(ganador = Winner) %>%
+  mutate(ganador = case_when( 
+    ganador == "Germany FR" ~ "Germany",
+    ganador == "England" ~ "United Kingdom",
+    TRUE ~ ganador)) %>% 
+  group_by(ganador) %>% 
+  summarise(n = n()) %>% 
+  arrange(desc(n)) %>% 
+  
+  
+  mutate(iso2 = countrycode(ganador, origin = "country.name",
+                            destination = "iso2c")) %>%
+  mutate(iso2 = tolower(iso2)) %>%
+  mutate(bandera_url = paste0("https://hatscripts.github.io/circle-flags/flags/", iso2, ".svg")) %>%
+  select(bandera_url, ganador, n)
+
+
+
+mi_tabla_final <- tabla_preparada %>%
+  gt() %>%
+  gt_img_rows(columns = bandera_url, height = 30) %>%
+  cols_label(
+    bandera_url = "",
+    ganador = "Selección",
+    n = "Títulos") %>%
+  tab_header(
+    title = md("**Palmarés**"),
+    subtitle = "Mundiales ganados hasta 2010")%>%
+  cols_align(align = "center", columns = n) %>%
+  gt_theme_dark() %>%
+  tab_style(
+    style = list(cell_text(weight = "bold", color = "#FFD700", size = pct(100))),
+    locations = cells_body(columns = n))
+
+
+mi_tabla_final
+```
+
+---
+
+<br>
+
+Con esto acabo mi trabajo para BigData!!
+
+<br>
+
+----------------------
+
+<br>
+
+### Información sobre la sesión
+
+Abajo muestro mi entorno de trabajo y paquetes utilizados
+
+```{r}
+#| echo: false
+sessioninfo::session_info() %>% 
+  details::details(summary = 'current session info') 
+```
+
+
+
